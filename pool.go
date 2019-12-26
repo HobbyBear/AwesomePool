@@ -23,7 +23,7 @@ type Pool struct {
 	mux     sync.RWMutex
 }
 
-func  New(ctx context.Context, cfg *Config) *Pool {
+func New(ctx context.Context, cfg *Config) *Pool {
 	ctx, cancel := context.WithCancel(ctx)
 	gr := &Pool{
 		Cfg:     cfg,
@@ -60,12 +60,12 @@ func (g *Pool) loop(f func(context.Context)) {
 	defer timer.Stop()
 	for {
 		g.execute(f)
+		timer.Reset(g.Cfg.IdleTimeout)
 		select {
 		case f = <-g.pending:
 			if f == nil {
 				return
 			}
-			timer.Reset(g.Cfg.IdleTimeout)
 		case <-timer.C:
 			return
 		}
